@@ -1,0 +1,82 @@
+export (
+	LinkedList
+	LinkedListLink
+)
+
+
+
+object LinkedList (
+	start: Optional:<LinkedListLink:<any>>,
+	end: Optional:<LinkedListLink:<any>>,
+	length: int,
+)
+
+
+
+object LinkedListLink (
+	prev: Optional:<LinkedListLink:<any>>,
+	next: Optional:<LinkedListLink:<any>>,
+	value: any,
+)
+
+
+
+object LinkedListIter (
+	current_link: Optional:<LinkedListLink:<any>>,
+	linked_list: LinkedList:<any>,
+	index: int,
+)
+
+
+
+
+
+// needs type annotations when called
+function LinkedList.new() returns LinkedList:<any>
+	return new LinkedList (
+		start: Nothing,
+		end: Nothing,
+		length: 0,
+	)
+end
+
+
+
+function LinkedList.add (self:<any>, item: any)
+	var item_link = LinkedListItem:<any>.new(item)
+	end.next = item_link
+	item_link.prev = end
+	self.end = item_link
+	self.length ++
+end
+
+
+
+
+
+function LinkedListLink.new (item: any) returns LinkedListLink:<any>
+	return new LinkedListLink (
+		prev: Nothing,
+		next: Nothing,
+		value: item,
+	)
+end
+
+
+
+
+
+function LinkedList.to_iter (self:<any>) returns LinkedListIter:<any>
+	return new LinkedListIter (
+		current_link: self.start,
+		linked_list: self,
+		index: 0,
+	)
+end
+
+
+
+function LinkedListIter.next_item (self:<any>) returns Optional<any>
+	if self.current_link is Nothing then return Nothing end
+	var output = self.current_link
+end

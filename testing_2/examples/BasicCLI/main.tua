@@ -1,0 +1,8 @@
+use std.input
+
+
+
+function main
+	var name = input.get_string()
+	print #"Hello, {name}!"
+end

@@ -1,0 +1,19 @@
+Finding all files
+    Find all files in dir
+    Filter by extention
+For each file:
+    Preprocessing
+        Remove comments
+    Lexing
+        Lex
+        Combine tokens
+    Parsing
+        Go through the tokens and detect types, functions, statements, etc
+        Store types (objects, choices, aliases) and functions (names and signatures) in program meta data
+For each file:
+    Main Compiling
+        Handle types
+            Seperate generic and concrete functions and types
+            Determin types & duplicate the generic functions and types as needed
+        ??? (convert to bytecode)
+    

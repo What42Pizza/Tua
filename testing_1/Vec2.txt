@@ -1,0 +1,130 @@
+export (
+	Vec2
+)
+
+
+
+object Vec2 (
+	x: float,
+	y: float,
+)
+
+
+
+#inline
+function new_Vec2 (x: float 0, y: float 0) returns Vec2
+	return new Vec2 (
+		x: x,
+		y: y,
+	)
+end
+
+
+
+#inline
+function add (a: Vec2, b: any) returns Vec2 // implicit requirement `function add (float, any) returns float`
+	return Vec2.new(
+		a.x + b,
+		a.y + b,
+	)
+end
+
+#inline
+function add (a: Vec2, b: Vec2) returns Vec2
+	return Vec2.new(
+		a.x + b.x,
+		a.y + b.y,
+	)
+end
+
+
+
+#inline
+function sub (a: Vec2, b: any) returns Vec2
+	return Vec2.new(
+		a.x - b,
+		a.y - b,
+	)
+end
+
+#inline
+function sub (a: Vec2, b: Vec) returns Vec2
+	return Vec2.new(
+		a.x - b.x,
+		a.y - b.y,
+	)
+end
+
+
+
+#inline
+function index (self: Vec2, index: uint) returns float
+	if index matches 0 then
+		return self.x
+	else matches 1 then
+		return self.y
+	else
+		crash #"cannot index Vec2 with {index}"
+	end
+end
+
+
+
+#inline
+function abs (self: Vec2) returns Vec
+	return Vec2.new(
+		abs(self.x),
+		abs(self.y),
+	)
+end
+
+
+
+#inline
+function to_string (self: Vec2)
+	return #"({self.x}, {self.y})"
+end
+
+
+
+function test_vec2s()
+	var vec2 = Vec2.new(1, 2)
+	vec2 += Vec2.new(3, 4)
+	print vec2
+end
+
+
+
+
+
+object Vec2Iter (
+	vec2: Vec2,
+	index: int,
+)
+
+
+
+function to_iter (self: Vec2) returns Vec2Iter
+	return new Vec2Iter (
+		vec: self,
+		index: 0,
+	)
+end
+
+
+
+function next_item (self: Vec2Iter) return Optional:<float>
+	switch self.index
+		if 0 then
+			self.index = 1
+			return Filled(0)
+		end
+		if 1 then
+			self.index = 2
+			return Filled(1)
+		end
+		else
+			return Nothing
+		end
+	end
+end

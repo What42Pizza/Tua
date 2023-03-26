@@ -1,0 +1,22 @@
+macro global (
+	set_is_this = true
+)
+
+macro test (
+	set_is_this = true
+)
+
+macro set_permission (
+	args = [name]
+	code = function()
+		input.lock = args.0
+	end
+)
+
+macro get_permission (
+	args = [name]
+	allowed_definition_types: [function]
+	code = function()
+		input.unlock_keys.add(args.0)
+	end
+)

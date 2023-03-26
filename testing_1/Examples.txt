@@ -1,0 +1,191 @@
+// Tua, a language inspired by Lua and Rust's [T]ype system
+
+
+
+
+
+// basic functions
+
+function fizz_buzz (input: int)
+	var output = ""
+	if input % 3 == 0 then
+		output ..= "Fizz"
+	end
+	if input % 5 == 0 then
+		output ..= "Buzz"
+	end
+	if output == "" then
+		output = input.to_string()
+	end
+	print output
+end
+
+function factorial (input: int) returns int
+	if input == 1 then return 1 end
+	return input * factorial(input - 1)
+end
+
+
+
+
+
+// basic types
+
+object Person (
+	name: string,
+	job: Optional:<Job>,
+	is_avive: bool,
+)
+
+choice Job (
+	Programmer,
+	Teacher,
+	GameDeveloper,
+)
+
+
+
+// basic type functions
+
+function new_Person (name: string "John Doe", job: Optional:<Job> Nothing) returns Person
+	return new Person (
+		name: name,
+		job: job,
+		is_alive: true,
+	)
+end
+
+function say_name (self: Person)
+	if self.is_alive then
+		print #"Hi, my name is {self.name}!"
+	end
+end
+
+function die (self: Person)
+	self.is_alive = false
+end
+
+
+
+function test_person_object()
+	var persons = HashMap:<key: String, value: Person>.new()
+	add_person_to_hash_map(Person.new("Steve"))
+	add_person_to_hash_map(Person.new())
+	all_say_name(persons)
+end
+
+function add_person_to_hash_map (person: Person, hash_map: HashMap<key: String, item: Person>) {
+	hash_map.set(person.name, person)
+}
+
+
+
+
+
+// basic generics
+
+
+
+// only 1 generic type
+// no implicit requirements
+function add_item (item: any_item, array: Array<any_item>)
+	array.add(item)
+end
+
+
+
+// 2 generic types, can be the same type for both, any type name that is "any" or starts with "any_" is generic (which means you can't create an object or choice name that starts with "any_")
+// implicit requirements that `function any_1.say_thing_1()` and `function any_2.say_thing_2()` must exist
+function say_stuff (item_1: any_1, item_2: any_2)
+	item_1.say_thing_1()
+	item_2.say_thing_2()
+end
+
+
+
+// implicit requirements:
+// 1: `function any.to_iter() returns any_2` must exist where
+//   1.1: `function any_2.next_item() returns Optional<any_3>` must exist
+// 2: `function any_3.say_name()` must exist
+function all_say_name (array: any)
+	for item in array do
+		item.say_name()
+	end
+end
+
+
+
+
+
+// function pointers
+
+// Function<> takes a tuple as its first generic arg that defines the inputs and a second generic arg that defines the output type
+function execute_function (func: Function:<(any_1, any_2), returns: any_3>, arg_1: any_1, arg_2: any_2) returns any_3
+	return func(arg_1, arg_2)
+end
+
+function test_execute_function()
+	print execute_function(function (a, b) return a + b end, 10, 20)
+	print execute_function(function (a, b) return a - b end, 10, 20)
+	print execute_function(function (a, b) return a * b end, 10, 20)
+	print execute_function(function (a, b) return a / b end, 10, 20)
+end
+
+
+
+
+
+// locking values
+
+object EvenInt (
+	#locked_unless(UnlockEvenInt)
+	num: int,
+)
+
+#getPermission(UnlockEvenInt)
+function new_EvenInt (num: int) returns MaybeError:<EvenInt>
+	if num % 2 == 1 then
+		return Error(InvalidEvenIntValue.new(num))
+	end
+	return new EvenInt (num: num)
+end
+
+#makeDefaultConstructor
+object InvalidEvenIntValue (
+	value: int
+)
+
+function test_locking()
+	var test1 = new EvenInt (num: 1) // errors because this function doesn't have permission to use this
+	var test2 = new EvenInt (num: 0) // valid input, but still errors b/c there's still not permission
+	var test3 = EvenInt.new(1) // returns MaybeError.Error, but does compile
+	var test4 = EvenInt.new(0) // works fine
+	test4.num = 2 // this also errors because this function doesn't have permission
+end
+
+
+
+
+
+// misc
+
+function misc()
+	var a = Person.new() + Person.new() // doesn't work b/c `function Person.add (self, Person) returns _` doesn't exist
+	var vec2 = Vec2.new(1, 2) + Vec2.new(3, 4) // does work b/c `function Vec2.add (self, Vec2) returns _` does exist
+	var x = vec2[0] // does work b/c `function Vec2.index (self, index: uint) returns _` does exist
+	var y = vec2[1]
+end
+
+
+
+// error:
+
+choice Error (
+	common: (name: String, details: String, trace: String[]),
+	IOError (source: IOError),
+)
+
+choice IOError (
+	common: (name: String, details: String, trace: String[]),
+	
+)

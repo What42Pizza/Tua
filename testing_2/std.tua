@@ -1,0 +1,132 @@
+global_use (
+	MaybeError,
+	error,
+)
+
+
+
+object MaybeError (
+	value: Optional<any> = Nothing,
+	error: Optional<any_error> = Nothing,
+)
+
+function MaybeError.from (input: any) returns MaybeError<any, any_error>
+	return new MaybeError(value: input)
+end
+
+function MaybeError.test (self)
+  returns ControlFlow<pass: any, error: MaybeError<any_void, any_error>>
+	if self.value then
+		return new ControlFlow(pass_value: self.value)
+	end
+	var return_value = MaybeError(error: self.error)
+	return new ControlFlow(return_value: return_value)
+end
+
+function error (input: any) returns MaybeError<any_void, any>
+	return new MaybeError(error: input)
+end
+
+
+
+object ControlFlow (
+	pass_value: Optional<any_pass> = Nothing,      // return of the ? operator
+	return_value: Optional<any_return> = Nothing,  // return from function value
+)
+
+
+
+// this will probably be implemented at the interpreter level
+function Optional.to (self<any>) returns any
+	if self.is_nothing() then
+		crash #"attempted to cast Nothing to {type_of any}"
+	end
+	return self.inner
+end
+
+function Optional.from (input: any) returns Self<any>
+	return new Optional(item: input)
+end
+
+
+
+#set_permission(UnlockArrayIter)
+object ArrayIter (
+	array: Array,
+	index: int = 0,
+)
+
+#get_permission(UnlockArrayIter)
+function Array.to_iter (self) returns ArrayIter
+	return new ArrayIter(array: self)
+end
+
+#get_permission(UnlockArrayIter)
+function ArrayIter.next_item (self) returns Optional<any>
+	if self.index >= self.array.length() then
+		return Nothing
+	end
+	self.index ++
+	return self.array[self.index - 1]
+end
+
+
+
+object IntRange (
+	start: int,
+	end: int,
+	increment: int = 1,
+	i = start,
+)
+
+funciton range (start: int, end: int) returns IntRange
+	return new IntRange (
+		start: start,
+		end: end,
+	)
+end
+
+function range (start: int, end: int, increment: int) returns IntRange
+	return new IntRange (
+		start: start,
+		end: end,
+		increment: increment,
+	)
+end
+
+function IntRange.next (mut self) returns Optional<int>
+	if i >= end then return Nothing end
+	i += increment
+	return i - increment
+end
+
+
+
+object FloatRange (
+	start: float,
+	end: float,
+	increment: float = 1,
+	i = start,
+)
+
+funciton range (start: float, end: float) returns FloatRange
+	return new FloatRange (
+		start: start,
+		end: end,
+	)
+end
+
+function range (start: float, end: float, increment: float) returns FloatRange
+	return new FloatRange (
+		start: start,
+		end: end,
+		increment: increment,
+	)
+end
+
+function FloatRange.next (mut self) returns Optional<float>
+	if i >= end then return Nothing end
+	i += increment
+	return i - increment
+end
+

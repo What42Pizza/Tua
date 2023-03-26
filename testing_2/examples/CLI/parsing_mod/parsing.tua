@@ -1,0 +1,63 @@
+function parse_user_data (raw_user_data: String)
+  returns MaybeError<UserData, ParseUserDataError>
+	
+	// split items
+	var items = raw_user_data.split(",")
+	
+	// get each name and value
+	var named_items = {}
+	for item in items do
+		var colon_index = item.find_first_char(':')
+		if colon_index == Nothing then
+			throw new ParseUserDataError(type: "NoColonFound", item: item)
+		end
+		var item_name = item.get_sub_string(0, colon_index).trim()
+		var item_value = item.get_sub_string(colon_index + 1, -1).trim()
+		named_items.add((item_name, item_value))
+	end
+	
+	// get required feilds
+	var user_name = named_items.find_first_match(function(item) return item.0 == "name" end)
+	if user_name == Nothing then
+		throw new ParseUserDataError(type: "MissingFeild", feild: "name")
+	end
+	var user_age = named_items.find_first_match(function(item) return item.0 == "age" end)
+	if user_age == Nothing then
+		throw new ParseUserDataError(type: "MissingFeild", feild: "age")
+	end
+	
+	// get other feilds
+	var output = new UserData(name: user_name, age: user_age)
+	var defined_feilds = {}
+	for each item in named_items do
+		if defined_feilds.contains(item.0) then
+			throw new ParseUserDataError(type: "FeildAlreadyDefined", feild: item.0)
+		end
+		add_item_to_user_data(item, output)?
+	end
+	
+	return output
+	
+end
+
+
+
+function add_item_to_user_daya (item: (String, String), user_data: UserData)
+  returns MaybeError<void, ParseUserDataError>
+	if item.0 matches "name" or "age" then
+		// already added
+	else matches "details" then
+		user_data.details = item.1
+	else
+		throw new ParseUserDataError(type: "UnknownFeild", feild: item.0)
+	end
+end
+
+
+
+object ParseUserDataError (
+	#must_equal("NoColonFound", "MissingFeild", "FeildAlreadyDefined", "UnknownFeild")
+	type: String,
+	item: Optional<String> = Nothing,
+	feild: Optional<String> = Nothing,
+)

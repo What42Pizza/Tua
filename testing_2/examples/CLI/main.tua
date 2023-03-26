@@ -1,0 +1,22 @@
+// the main purpose of this example is showing how modules work
+
+
+
+use std.input, this.parsing
+
+
+
+function main returns MaybeError<None>
+	loop
+		print "Enter user data:"
+		var raw_user_data = input.get_string()?
+		var user_data = parsing.parse_user_data(raw_user_data)
+		if user_data.error then
+			crash #"Error while parsing user data: {user_data.error}"
+		end
+		var user_data = user_data.value
+		print #"User data: {user_data}"
+		print "Would you like to enter another user?"
+		var continue_input = input.get_yes_or_no()
+	end
+end

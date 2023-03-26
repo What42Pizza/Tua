@@ -1,0 +1,109 @@
+visibles (
+	Vec2
+)
+
+
+
+object Vec2 (
+	x: float 0,
+	y: float 0,
+)
+
+
+
+#inline
+function Vec2.add (self, other: any) returns Vec2 // implicit requirement `function add (float, any) returns float`
+	return new Vec2(
+		self.x + other,
+		self.y + other,
+	)
+end
+
+#inline
+function Vec2.add (self, other: Vec2) returns Vec2
+	return new Vec2(
+		self.x + other.x,
+		self.y + other.y,
+	)
+end
+
+
+
+#inline
+function Vec2.sub (self, other: any) returns Vec2
+	return new Vec2(
+		self.x - b,
+		self.y - b,
+	)
+end
+
+#inline
+function Vec2.sub (self, other: Vec2) returns Vec2
+	return new Vec2(
+		self.x - other.x,
+		self.y - other.y,
+	)
+end
+
+
+
+#inline
+function Vec2.index (self, index: uint) returns float
+	if index matches 0 then
+		return self.x
+	else matches 1 then
+		return self.y
+	else
+		crash #"cannot index Vec2 with {index}"
+	end
+end
+
+
+
+#inline
+function Vec2.abs (self) returns Vec
+	return new Vec2(abs(self.x), abs(self.y))
+end
+
+
+
+#inline
+function Vec2.to_string (self)
+	return #"({self.x}, {self.y})"
+end
+
+
+
+function test_vec2s()
+	var vec2 = new Vec2(1, 2)
+	vec2 += new Vec2(3, 4)
+	print vec2
+end
+
+
+
+
+
+#set_permission(UnlockVec2Iter)
+object Vec2Iter (
+	vec2: Vec2,
+	index: int = 0,
+)
+
+#get_permission(UnlockVec2Iter)
+function Vec2.to_iter (self) returns Vec2Iter
+	return new Vec2Iter (vec2: self)
+end
+
+#get_permission(UnlockVec2Iter)
+function Vec2Iter.next_item (self) returns Optional<float>
+	if self.index matches 0 then
+		self.index = 1
+		return self.vec2.x
+	else matches 1 then
+		self.index = 2
+		return self.vec2.y
+	else
+		return Nothing
+	end
+end

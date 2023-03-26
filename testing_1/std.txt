@@ -1,0 +1,50 @@
+export (
+	Optional & choices
+	MaybeError & choices
+)
+
+
+
+choice Optional (
+	Filled (any),
+	Nothing,
+)
+
+function get_test_action (self: Optional:<any>) returns TestAction:<any, Optional:<any>>
+	if self is Filled(value) then
+		return TestAction.PassValue(value)
+	else if Nothing then
+		return TestAction.Return(Nothing)
+	end
+end
+
+
+
+choice MaybeError (
+	Ok (any),
+	#allowAutoGenerics
+	Error (any_error),
+)
+
+function get_ok (self: MaybeError:<any, error: any_error>) returns any
+	if self matches Ok(value) then
+		return value
+	else matches Error(error) then
+		crash #"Error: tried to get ok variant of MaybeError.Error({error})"
+	end
+end
+
+function get_test_action (self: MaybeError:<any, error: any_error>) returns TestAction:<any, MaybeError:<any, any_error>>
+	if self matches Ok(value) then
+		return TestAction.PassValue(value)
+	else matches Error(error) then
+		return TestAction.Return(Error(error))
+	end
+end
+
+
+
+choice TestAction (
+	PassValue (any_evaluated_return_type),
+	Return (any_exit_return_type),
+)

@@ -1,0 +1,12 @@
+global_use (
+	UserData,
+)
+
+
+
+object UserData (
+	name: String,
+	age: float,
+	details: Optional<String> = Nothing,
+	friends: UserData[] = {},
+)

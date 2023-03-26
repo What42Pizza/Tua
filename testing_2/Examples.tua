@@ -1,0 +1,192 @@
+// Tua, a language inspired by Lua's syntax and Rust's [T]ype system
+
+
+
+
+
+// basic functions
+
+function fizz_buzz (input: int)
+	var output = ""
+	if input % 3 == 0 then
+		output ..= "Fizz"
+	end
+	if input % 5 == 0 then
+		output ..= "Buzz"
+	end
+	if output == "" then
+		output = input.to_string()
+	end
+	print output
+end
+
+function factorial (input: uint) returns uint
+	if input == 0 then return 1 end
+	return input * factorial(input - 1)
+end
+
+
+
+
+
+// basic types
+
+object Person (
+	name: String = "John Doe",
+	job: Optional<Job> = Nothing,
+	is_avive: bool = true,
+)
+
+choice Job (
+	Programmer,
+	Teacher,
+	GameDeveloper,
+)
+
+
+
+// basic type functions
+
+function Person.say_name (self)
+	if self.is_alive then
+		print #"Hi, my name is {self.name}!"
+	end
+end
+
+function Person.die (self)
+	self.is_alive = false
+end
+
+function Person.equals (self, other: Person) returns bool
+	var is_equal =
+		self.name == other.name and
+		self.job == other.job
+	if is_equal and self.is_alive != other.is_alive then
+		print #"WARNING: this person is both alive and dead: {self}"
+	end
+	return is_equal
+end
+
+
+
+function test_person_object()
+	var persons = new HashMap:<key: String, value: Person>()
+	add_person_to_hash_map(new Person (name: "Steve"))
+	add_person_to_hash_map(new Person())
+	all_say_name(persons)
+end
+
+function add_person_to_hash_map (person: Person, hash_map: HashMap<key: String, value: Person>) {
+	hash_map.set(person.name, person)
+}
+
+
+
+
+
+// basic generics
+
+
+
+// only 1 generic type
+// no implicit requirements
+function add_item (item: any_item, array: any_item[])
+	array.add(item)
+end
+
+
+
+// 2 generic types, can be the same type for both, any type name that is "any" or starts with "any_" is generic (which means you can't create an object or choice name that starts with "any_")
+// implicit requirements that `function any_1.say_thing_1()` and `function any_2.say_thing_2()` must exist
+function say_stuff (item_1: any_1, item_2: any_2)
+	item_1.say_thing_1()
+	item_2.say_thing_2()
+end
+
+
+
+// implicit requirements:
+// 1: `function any.to_iter() returns any_2` must exist where
+//   1.1: `function any_2.next_item() returns any_3?` must exist
+// 2: `function any_3.say_name()` must exist
+function all_say_name (array: any)
+	for item in array.iter() do
+		item.say_name()
+	end
+end
+
+
+
+function Array<int>.test (self, input: Array<int>)
+	print input
+end
+
+
+
+
+
+// function pointers
+
+// `Function<>` takes a tuple as its first generic arg that defines the inputs and a second generic arg that defines the output type
+function execute_function (func: Function<(any_1, any_2), returns: any_3>, arg_1: any_1, arg_2: any_2) returns any_3
+	return func(arg_1, arg_2)
+end
+
+function test_execute_function()
+	print execute_function(function (a, b) return a + b end, 10, 20)
+	print execute_function(function (a, b) return a - b end, 10, 20)
+	print execute_function(function (a, b) return a * b end, 10, 20)
+	print execute_function(function (a, b) return a / b end, 10, 20)
+end
+
+
+
+
+
+// locking values
+
+#set_permission(UnlockEvenInt)
+object EvenInt (
+	num: int 0,
+)
+
+#get_permission(UnlockEvenInt)
+function EvenInt.new (num: int = 0) returns MaybeError<EvenInt, error: InavlidEvenIntValue>
+	if num % 2 == 1 then
+		throw new InvalidEvenIntValue(num)
+	end
+	return new EvenInt(num)
+end
+
+object InvalidEvenIntValue (
+	value: int
+)
+
+function test_locking()
+	var test1 = new EvenInt(1) // errors because this function doesn't have permission to use this
+	var test2 = new EvenInt(0) // valid input, but still errors b/c there's still not permission
+	var test3 = EvenInt.new(1) // returns an error, but does compile
+	var test4 = EvenInt.new(0) // works fine
+	var test5 = EvenInt.new() // also works fine (and returns `EvenInt (num: 0)`)
+	test4.num = 2 // errors because this function doesn't have permission
+end
+
+
+
+
+
+// misc
+
+function misc()
+	var a = new Person() + new Person() // doesn't work b/c `function Person.add (self, Person) returns _` doesn't exist
+	var vec2 = new Vec2(1, 2) + new Vec2(3, 4) // does work b/c `function Vec2.add (self, Vec2) returns _` does exist
+	var x = vec2[0] // does work b/c `function Vec2.index (self, index: uint) returns _` does exist
+	var y = vec2[1]
+end
+
+
+
+#test
+function test_stuff()
+	assert(EvenInt.new() == EvenInt.new(0))
+end

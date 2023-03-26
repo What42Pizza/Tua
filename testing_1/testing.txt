@@ -1,0 +1,59 @@
+#makeDefaultConstructor
+object Person (
+	name: String,
+	age: uint,
+	#notInConstructor
+	is_alive: bool,
+)
+
+
+
+// since no second generic arg is given for MaybeError, it is implied to be an anonymous `choice`
+// full return type: MaybeError:<PersonData, (InvalidInputLength or InvalidUInt)>
+function parse_person_data (input: String) returns MaybeError:<PersonData>
+	var input_parts = input.split('`')
+	
+	var length = input_parts.length()
+	if length != 2 then
+		return Error(InvalidInputLength.new(length))
+	end
+	
+	var name = input_parts[0]
+	var age = test input_parts[1].to_uint()
+	return PersonData.new(name, age)
+	
+end
+
+#makeDefaultConstructor
+object InvalidInputLength (
+	length: int,
+)
+
+
+
+function use_parse_person_data() returns Optional:<PersonData>
+	
+	// needs to throw an error if code block end isn't unreachable
+	var person_data = parse_person_data("John Doe`30") is Ok or Error(error)
+		if error matches InvalidInputLength(length) then
+			print #"Error: invalid length ({length})"
+			return Nothing
+		else matches InvalidUInt(cast_error) then
+			print #"Error: invalid age ({cast_error})"
+			return Nothing
+		end
+	end
+	
+	return Filled(person_data)
+	
+end
+
+
+
+function use_parse_person_data_2() returns MaybeError:<PersonData>
+	
+	var person_data = test parse_person_data("John Doe`30")
+	
+	return Ok(person_data)
+	
+end

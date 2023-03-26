@@ -1,0 +1,12 @@
+[package]
+name = "tua_interpreter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rayon = "1.6"
+#hashbrown = "0.13"
+array-init = "2.0"
+#regex = "1.7"
+#derive_is_enum_variant = "0.1"
+#fmt-derive = "0.0"
